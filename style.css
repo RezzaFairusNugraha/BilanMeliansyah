@@ -1,3 +1,7 @@
+/* style.css — responsive version
+   Replace your current style.css with this file.
+*/
+
 * {
   margin: 0;
   padding: 0;
@@ -5,6 +9,9 @@
   font-family: "Courier New", monospace;
 }
 
+/* ---------------------------
+   Cursor / pointer behavior
+   --------------------------- */
 .custom-cursor {
   position: fixed;
   width: 40px;
@@ -16,22 +23,42 @@
   transform: translate(-50%, -50%);
 }
 
+/* Hide custom cursor on touch devices (or coarse pointers) */
+@media (pointer: coarse) {
+  .custom-cursor {
+    display: none !important;
+  }
+}
+
+/* Fallback if JS adds .touch-device class to body */
+body.touch-device .custom-cursor {
+  display: none !important;
+}
+
 body:not(.touch-device) {
   cursor: none;
 }
 
+/* ---------------------------
+   Base layout
+   --------------------------- */
 body {
   background-color: #000;
   color: #fff;
-  overflow: hidden;
+  /* Allow scrolling by default; on desktops the layout still covers viewport */
+  overflow: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   position: relative;
+  overflow: hidden;
 }
 
+/* Fullscreen background video */
 #background {
   position: fixed;
   top: 0;
@@ -43,6 +70,7 @@ body {
   pointer-events: none;
 }
 
+/* overlays */
 .glitch-overlay {
   position: fixed;
   top: 0;
@@ -65,22 +93,35 @@ body {
   z-index: 3;
 }
 
+/* hidden helper */
 .hidden {
   display: none !important;
 }
 
+/* ---------------------------
+   Controls (top / bottom)
+   --------------------------- */
 .controls {
   position: fixed;
-  bottom: calc(50% - 240px - 10px);
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 10px;
-  z-index: 20;
+  z-index: 40;
   background: rgba(0, 0, 0, 0.7);
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 20px;
   backdrop-filter: blur(5px);
+}
+
+/* Small devices: bring controls slightly inward */
+@media (max-width: 430px) {
+  .controls {
+    bottom: 18px;
+    padding: 5px 8px;
+    gap: 8px;
+  }
 }
 
 .theme-button {
@@ -99,17 +140,19 @@ body {
 }
 
 .theme-button:hover {
-  transform: scale(1.1);
+  transform: scale(1.08);
   border-color: rgba(255, 255, 255, 0.8);
 }
 
-.volume-control {
+.volume-control,
+.transparency-control {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.volume-icon {
+.volume-icon,
+.transparency-icon {
   width: 20px;
   height: 20px;
   cursor: pointer;
@@ -137,18 +180,7 @@ body {
   cursor: pointer;
 }
 
-.transparency-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.transparency-icon {
-  width: 20px;
-  height: 20px;
-  color: white;
-}
-
+/* top-controls (volume/transparency group) */
 .top-controls {
   position: fixed;
   bottom: calc(50% - 240px - 60px);
@@ -157,19 +189,68 @@ body {
   display: flex;
   align-items: center;
   gap: 15px;
-  z-index: 20;
+  z-index: 30;
   background: rgba(0, 0, 0, 0.7);
   padding: 8px 12px;
   border-radius: 20px;
   backdrop-filter: blur(5px);
 }
 
+/* On small screens, move top-controls above content */
+@media (max-width: 900px) {
+  .top-controls {
+    position: fixed;
+    top: env(safe-area-inset-top, 12px);
+    left: 12px;
+    right: 12px;
+    transform: none;
+    display: flex;
+    gap: 10px;
+    padding: 8px 10px;
+    z-index: 1;
+    align-items: center;
+    justify-content: flex-start;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 14px;
+    backdrop-filter: blur(6px);
+    overflow-x: auto; /* memungkinkan scroll horizontal bila penuh */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* touch target friendly */
+  .top-controls .theme-button,
+  .top-controls .volume-icon,
+  .top-controls .transparency-icon,
+  .top-controls button,
+  .top-controls .control {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 6px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  /* sliders touch-ready */
+  .top-controls .slider {
+    width: 120px;
+    height: 6px;
+    touch-action: manipulation;
+  }
+}
+
+/* ---------------------------
+   Profile & Skills blocks
+   Responsive: use max-width & relative centering
+   --------------------------- */
 #profile-block {
-  transform: translateX(-50%);
   position: fixed;
   top: 28%;
   left: 50%;
-  width: 820px;
+  transform: translateX(-50%);
+  width: min(92%, 820px);
   min-height: 332px;
   background: rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -182,8 +263,59 @@ body {
   backdrop-filter: blur(10px);
   opacity: 0;
   transform-style: preserve-3d;
-  transition: transform 0.5s ease-out;
+  transition: transform 0.5s ease-out, opacity 0.45s ease;
   pointer-events: auto;
+  margin: 0 auto;
+}
+
+/* For small screens switch to centered absolute so it sits in viewport middle */
+@media (max-width: 900px) {
+  #profile-block {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(95%, 680px);
+    min-height: auto;
+    max-width: 420px;
+    padding: 16px;
+    margin: 0 auto;
+  }
+}
+
+/* Skills block mirrors profile block */
+#skills-block {
+  position: fixed;
+  top: 28%;
+  left: 50%;
+  transform: translate(-50%);
+  width: min(92%, 820px);
+  min-height: 332px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  border-radius: 15px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  backdrop-filter: blur(10px);
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-out;
+}
+
+/* Make skills block behave like profile block on small screens */
+@media (max-width: 900px) {
+  #skills-block {
+    position: absolute;
+    top: auto;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(95%, 680px);
+    max-width: 420px;
+    padding: 14px;
+  }
 }
 
 .profile-header {
@@ -192,6 +324,7 @@ body {
   gap: 15px;
 }
 
+/* PROFILE picture container */
 .profile-container {
   position: relative;
   width: 150px;
@@ -231,19 +364,26 @@ body {
   opacity: 1 !important;
 }
 
+/* Mobile sizes for the profile picture */
+@media (max-width: 430px) {
+  .profile-container {
+    width: 120px;
+    height: 120px;
+  }
+  .profile-picture {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* Info area */
 .profile-info {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.name-and-badges {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
+/* Typographic face for profile name */
 @font-face {
   font-family: "Angel Wish";
   src: url("assets/Angel_wish.ttf") format("truetype");
@@ -261,6 +401,7 @@ body {
   opacity: 1 !important;
 }
 
+/* badges */
 .badge-group {
   display: flex;
   flex-wrap: wrap;
@@ -331,6 +472,7 @@ body {
   opacity: 1 !important;
 }
 
+/* separator */
 .bio-separator {
   width: 100%;
   height: 1px;
@@ -339,6 +481,7 @@ body {
   opacity: 1 !important;
 }
 
+/* footer area */
 .profile-footer {
   display: flex;
   flex-direction: column;
@@ -370,7 +513,7 @@ body {
   transform: scale(1.4) rotateY(15deg);
 }
 
-/* ============ DISCORD SERVER STYLE ============ */
+/* Discord server link box */
 .discord-server-link {
   display: flex;
   align-items: center;
@@ -435,250 +578,27 @@ body {
   background: #4752c4;
 }
 
-#skills-block {
-  position: fixed;
-  top: 28%;
-  left: 50%;
-  transform: translate(-50%);
-  width: 820px;
-  min-height: 332px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 20px;
-  border-radius: 15px;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  backdrop-filter: blur(10px);
-  transform-style: preserve-3d;
-  transition: transform 0.5s ease-out;
-}
-
-.skills-title {
-  text-align: center;
-  font-size: 24px;
-  margin-bottom: 15px;
-}
-
-.skill {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.skill-name {
-  display: flex;
-  justify-content: space-between;
+/* visitor counter */
+.visitor-counter {
+  display: inline-flex;
   align-items: center;
-}
-
-.skill-icon {
-  width: 22px;
-  height: 22px;
-  margin-right: 8px;
-}
-
-.skill-bar-container {
-  height: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.skill-bar {
-  height: 100%;
-  border-radius: 5px;
-  width: 0%;
-  transition: width 2s;
-}
-
-#python-bar {
-  background: linear-gradient(90deg, #ff6b6b, #ff9f9f);
-}
-
-#cpp-bar {
-  background: linear-gradient(90deg, #4facfe, #00f2fe);
-}
-
-#csharp-bar {
-  background: linear-gradient(90deg, #43e97b, #38f9d7);
-}
-
-#results-button-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
-}
-
-#results-theme {
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-family: "Courier New", monospace;
+  gap: 8px;
   font-size: 14px;
-  backdrop-filter: blur(5px);
-  transition: all 0.3s;
-}
-
-#results-theme:hover {
-  background: rgba(0, 0, 0, 0.9);
-  border-color: rgba(255, 255, 255, 0.8);
-}
-
-#results-hint {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 12px;
-  width: 180px;
-  text-align: center;
-  pointer-events: none;
-  z-index: 25;
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-#results-hint::before {
-  content: "";
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 0 10px 10px 10px;
-  border-style: solid;
-  border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
-}
-
-.home-theme #profile-block,
-.home-theme #skills-block {
-  border-color: rgba(0, 195, 255, 0.5);
-}
-
-.hacker-theme #profile-block,
-.hacker-theme #skills-block {
-  border-color: rgba(0, 255, 0, 0.5);
-}
-
-.anime-theme #profile-block,
-.anime-theme #skills-block {
-  border-color: rgba(255, 0, 255, 0.5);
-}
-
-.glitch {
-  animation: glitch 0.2s ease-in-out;
-}
-
-@keyframes glitch {
-  0% {
-    transform: translate(0);
-  }
-  20% {
-    transform: translate(-2px, 2px);
-  }
-  40% {
-    transform: translate(-2px, -2px);
-  }
-  60% {
-    transform: translate(2px, 2px);
-  }
-  80% {
-    transform: translate(2px, -2px);
-  }
-  100% {
-    transform: translate(0);
-  }
-}
-
-@keyframes orbit {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes fast-orbit {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.cursor-trail {
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-.cursor-trail-dot {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: opacity 0.3s ease;
-}
-
-#start-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 30;
-  cursor: pointer;
-}
-
-#start-text {
-  font-family: "Courier New", monospace;
-  font-size: 24px;
   color: #fff;
-  text-align: center;
 }
 
-@media (max-width: 430px) {
-  #profile-block,
-  #skills-block {
-    width: 90vw;
-    max-width: 350px;
-    min-height: 280px;
-    padding: 15px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
+.visitor-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
 
+/* small devices tweaks */
+@media (max-width: 430px) {
   .profile-header {
     flex-direction: column;
     align-items: center;
     gap: 10px;
-  }
-
-  .profile-container {
-    width: 60px;
-    height: 60px;
-  }
-
-  .profile-picture {
-    width: 120px;
-    height: 120px;
   }
 
   .profile-info {
@@ -758,13 +678,6 @@ body {
     flex-shrink: 0;
   }
 
-  .visitor-counter .tooltip {
-    width: 100px;
-    font-size: 12px;
-    margin-left: -50px;
-    top: -30px;
-  }
-
   .skills-title {
     font-size: 18px;
     margin-bottom: 10px;
@@ -780,7 +693,7 @@ body {
   }
 
   .controls {
-    bottom: 20px;
+    bottom: 18px;
     gap: 8px;
     padding: 5px 8px;
   }
@@ -792,7 +705,11 @@ body {
   }
 
   .top-controls {
-    bottom: 70px;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: auto;
+    transform: none;
     gap: 10px;
     padding: 6px 10px;
   }
@@ -833,6 +750,223 @@ body {
     padding: 6px 10px;
   }
 
+  #start-text {
+    font-size: 18px;
+    padding: 0 20px;
+  }
+
+  /* allow page to scroll on small screens if content taller than viewport */
+  body {
+    overflow-y: auto;
+  }
+}
+
+/* ---------------------------
+   Skills layout & bars
+   --------------------------- */
+.skills-title {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.skill {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.skill-name {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skill-icon {
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+}
+
+.skill-bar-container {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.skill-bar {
+  height: 100%;
+  border-radius: 5px;
+  width: 0%;
+  transition: width 2s;
+}
+
+#python-bar {
+  background: linear-gradient(90deg, #ff6b6b, #ff9f9f);
+}
+
+#cpp-bar {
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+}
+
+#csharp-bar {
+  background: linear-gradient(90deg, #43e97b, #38f9d7);
+}
+
+/* results button container */
+#results-button-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+}
+
+#results-theme {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s;
+}
+
+#results-theme:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+#results-hint {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  width: 180px;
+  text-align: center;
+  pointer-events: none;
+  z-index: 45;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#results-hint::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
+}
+
+/* theme border colors */
+.home-theme #profile-block,
+.home-theme #skills-block {
+  border-color: rgba(0, 195, 255, 0.5);
+}
+
+.hacker-theme #profile-block,
+.hacker-theme #skills-block {
+  border-color: rgba(0, 255, 0, 0.5);
+}
+
+.anime-theme #profile-block,
+.anime-theme #skills-block {
+  border-color: rgba(255, 0, 255, 0.5);
+}
+
+/* animations */
+.glitch {
+  animation: glitch 0.2s ease-in-out;
+}
+
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
+}
+
+@keyframes orbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes fast-orbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* cursor trail (if used) */
+.cursor-trail {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+}
+.cursor-trail-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+}
+
+/* start screen overlay */
+#start-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  cursor: pointer;
+}
+
+#start-text {
+  font-family: "Courier New", monospace;
+  font-size: 24px;
+  color: #fff;
+  text-align: center;
+}
+
+/* smaller start text for small screens */
+@media (max-width: 430px) {
   #start-text {
     font-size: 18px;
     padding: 0 20px;
